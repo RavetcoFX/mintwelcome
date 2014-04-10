@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import gi
-from gi.repository import Gtk, Gdk
+from gi.repository import Gtk, Gdk, GLib
 from gi.repository import WebKit
 from gi.repository.GdkPixbuf import Pixbuf
 
@@ -74,7 +74,8 @@ class MintWelcome():
         vbox.pack_start(headerbox, False, False, 10)
 
         welcome_label = Gtk.Label()
-        welcome_message = _("Welcome and thank you for choosing Linux Mint. We hope you'll enjoy using it as much as we did designing it. The links below will help you get started with your new operating system. Have a great time and don't hesitate to send us your feedback.")
+        text_name = GLib.get_real_name()
+        welcome_message = _("Welcome " + "<b>%s</b>" % text_name + ", and thank you for choosing Linux Mint. We hope you'll enjoy using it as much as we did designing it. The links below will help you get started with your new operating system. Have a great time and don't hesitate to send us your feedback.")
         welcome_label.set_markup("<span font='9' fgcolor='#3e3e3e'>%s</span>" % welcome_message)
         welcome_label.set_line_wrap(True)
         vbox.pack_start(welcome_label, False, False, 10)
@@ -136,13 +137,13 @@ class MintWelcome():
         main_box.pack_end(statusbar, False, False, 0)
 
         hbox = Gtk.HBox()
-        checkbox = Gtk.CheckButton()
-        checkbox.set_label(_("Show this dialog at startup"))
-        checkbox.override_color(Gtk.StateType.NORMAL, fgcolor)
+        switch = Gtk.Switch()
+        switch_label = Gtk.Label(_("Show this dialog at startup"))
         if not os.path.exists(home + "/.linuxmint/mintWelcome/norun.flag"):
-            checkbox.set_active(True)
-        checkbox.connect("toggled", self.on_button_toggled)
-        hbox.pack_end(checkbox, False, False, 2)
+            switch.set_active(True)
+        switch.connect("notify::active", self.on_switch_toggled)
+        hbox.pack_end(switch, False, False, 2)
+        hbox.pack_end(switch_label, False, False, 2)
         statusbar.pack_end(hbox, False, False, 2)
         
         window.add(main_box)
@@ -169,8 +170,8 @@ class MintWelcome():
 
         window.show_all()
 
-    def on_button_toggled(self, button):
-        if button.get_active():
+    def on_switch_toggled(self, switch, muf):
+        if switch.get_active():
             if os.path.exists(home + "/.linuxmint/mintWelcome/norun.flag"):
                 os.system("rm -rf " + home + "/.linuxmint/mintWelcome/norun.flag")
         else:  
@@ -219,3 +220,4 @@ class MintWelcome():
 if __name__ == "__main__":
     MintWelcome()
     Gtk.main()
+
